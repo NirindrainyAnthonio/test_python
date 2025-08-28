@@ -1,0 +1,46 @@
+repos:
+  # Formatage du code avec Black
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  # Organisation des imports avec isort
+  - repo: https://github.com/PyCQA/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+        name: isort (python)
+        language_version: python3
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.12.10
+    hooks:
+      # Run the linter.
+      - id: ruff-check
+      # Run the formatter.
+      - id: ruff-format
+
+  # Analyse de sécurité statique avec Bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.6
+    hooks:
+      - id: bandit
+        args: ["-r", "."]
+
+  # Vérification des vulnérabilités des dépendances avec Safety
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety  
+    rev: v1.4.2
+    hooks:
+      - id: python-safety-dependencies-check
+
+
+
+  # Vérification du style et linting avec Flake8
+  # - repo: https://github.com/pycqa/flake8
+  #   rev: 7.3.0
+  #   hooks:
+  #     - id: flake8
+  #       additional_dependencies: [flake8-bugbear]  # Optionnel pour plus de règles
