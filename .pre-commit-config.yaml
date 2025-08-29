@@ -36,6 +36,7 @@ repos:
     hooks:
       - id: python-safety-dependencies-check
 
+  # Analyse de code et détection de vulnérabilités avec Semgrep
   - repo: https://github.com/semgrep/pre-commit
     rev: 'v1.134.0'
     hooks:
