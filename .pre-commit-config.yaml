@@ -31,10 +31,17 @@ repos:
         args: ["-f", "json"]
 
   # Vérification des vulnérabilités des dépendances avec Safety
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety  
+  # - repo: https://github.com/Lucas-C/pre-commit-hooks-safety  
+  #   rev: v1.4.2
+  #   hooks:
+  #     - id: python-safety-dependencies-check
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
     rev: v1.4.2
     hooks:
       - id: python-safety-dependencies-check
+        # (optionnel) ne scanne que tes requirements
+        files: ^requirements.*\.txt$
 
   # Analyse de code et détection de vulnérabilités avec Semgrep
   - repo: https://github.com/semgrep/pre-commit
