@@ -36,6 +36,11 @@ repos:
     hooks:
       - id: python-safety-dependencies-check
 
+  - repo: https://github.com/semgrep/pre-commit
+    rev: 'v1.134.0'
+    hooks:
+      - id: semgrep-ci
+
 
 
   # Vérification du style et linting avec Flake8
