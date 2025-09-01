@@ -48,7 +48,7 @@ repos:
 
   # Nettoie les espaces inutiles, assure une fin de fichier correcte.
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -57,8 +57,8 @@ repos:
 
 
   # Vérification du style et linting avec Flake8
-  # - repo: https://github.com/pycqa/flake8
-  #   rev: 7.3.0
-  #   hooks:
-  #     - id: flake8
-  #       additional_dependencies: [flake8-bugbear]  # Optionnel pour plus de règles
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-bugbear]  # Optionnel pour plus de règles
