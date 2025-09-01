@@ -16,7 +16,7 @@ repos:
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.12.10
+    rev: v0.12.11
     hooks:
       # Run the linter.
       - id: ruff-check
@@ -46,6 +46,14 @@ repos:
     hooks:
       - id: semgrep-ci
 
+  # Nettoie les espaces inutiles, assure une fin de fichier correcte.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
 
 
   # Vérification du style et linting avec Flake8
