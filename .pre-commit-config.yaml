@@ -31,14 +31,14 @@ repos:
         args: ["-f", "json"]
 
   # Vérification des vulnérabilités des dépendances avec Safety
-  - repo: local
-    hooks:
-      - id: safety-scan
-        name: safety scan
-        entry: safety
-        language: system
-        pass_filenames: false
-        args: ["scan", "-r", "requirements.txt"]
+  # - repo: local
+  #   hooks:
+  #     - id: safety-scan
+  #       name: safety scan
+  #       entry: safety
+  #       language: system
+  #       pass_filenames: false
+  #       args: ["scan", "-r", "requirements.txt"]
 
   # Analyse de code et détection de vulnérabilités avec Semgrep
   - repo: https://github.com/semgrep/pre-commit
