@@ -3,4 +3,4 @@ def add(a, b):
 
 
 def minus(a, b):
-    return a - b
+    return a + b
