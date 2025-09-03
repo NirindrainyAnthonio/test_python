@@ -8,7 +8,6 @@ COMMANDS = {
         ["isort"],
         ["ruff", "check"],
         ["ruff", "format"],
-        # ["bandit", "-ll", "-r", ".", "-f", "json"],  # Bandit doit cibler un dossier
         ["flake8", "--max-line-length=250"],
     ],
     "requirements": [["safety", "scan", "-r", "requirements.txt"]],
@@ -17,7 +16,7 @@ COMMANDS = {
 
 
 def get_changed_files():
-    # Récupère les fichiers modifiés dans le commit"""
+    """Récupère les fichiers modifiés dans le commit"""
     result = subprocess.run(
         ["git", "diff", "--cached", "--name-only"],
         capture_output=True,
@@ -28,7 +27,7 @@ def get_changed_files():
 
 
 def run_command(cmd, files=None):
-    # Exécute une commande et affiche Passed/Failed/Skipped"""
+    """Exécute une commande et affiche Passed/Failed/Skipped"""
     full_cmd = cmd.copy()
 
     # On ajoute les fichiers seulement pour les outils qui l'acceptent
@@ -59,6 +58,29 @@ def run_command(cmd, files=None):
         sys.exit(1)  # stoppe immédiatement le commit
 
 
+def run_bandit(py_files):
+    """Exécute Bandit correctement (sur les fichiers modifiés ou tout le projet)"""
+    if py_files:
+        full_cmd = ["bandit", "-ll", "-f", "json"] + py_files
+    else:
+        full_cmd = ["bandit", "-ll", "-r", ".", "-f", "json"]
+
+    print(f"Execution: {' '.join(full_cmd)}")
+    try:
+        result = subprocess.run(full_cmd, check=True, capture_output=True, text=True)
+        print(result.stdout.strip() or "Bandit check passed")
+        print("Passed: Bandit")
+    except subprocess.CalledProcessError as e:
+        print("Failed: Bandit")
+        if e.stdout.strip():
+            print("\n--- Sortie standard ---")
+            print(e.stdout.strip())
+        if e.stderr.strip():
+            print("\n--- Sortie erreur ---")
+            print(e.stderr.strip())
+        sys.exit(1)
+
+
 def main():
     changed_files = get_changed_files()
     if not changed_files:
@@ -72,6 +94,7 @@ def main():
     if py_files:
         for cmd in COMMANDS["python"]:
             run_command(cmd, py_files)
+        run_bandit(py_files)
     else:
         print("Skipped: vérifications Python (aucun fichier .py modifié)")
 
