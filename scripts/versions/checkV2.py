@@ -1,68 +1,62 @@
 import subprocess
 import sys
 
-# Commandes de lint/format à exécuter
+# Commandes de lint/format à exécuter (sera filtré par type de fichier)
 COMMANDS = {
     "python": [
         ["black"],
         ["isort"],
         ["ruff", "check"],
         ["ruff", "format"],
-        # ["bandit", "-ll", "-r", ".", "-f", "json"],  # Bandit doit cibler un dossier
+        ["bandit", "-ll", "-r"],
         ["flake8", "--max-line-length=250"],
     ],
-    "requirements": [["safety", "scan", "-r", "requirements.txt"]],
-    "generic": [["semgrep", "ci"]],
+    "requirements": [["safety", "scan", "-r"]],
+    "generic": [
+        ["semgrep", "ci"],
+    ],
 }
 
 
 def get_changed_files():
-    """Récupère les fichiers modifiés dans le commit"""
+    # Récupère les fichiers modifiés dans le commit
     result = subprocess.run(
         ["git", "diff", "--cached", "--name-only"],
         capture_output=True,
         text=True,
         check=True,
     )
-    return [f.strip() for f in result.stdout.splitlines() if f.strip()]
+    files = [f.strip() for f in result.stdout.splitlines() if f.strip()]
+    return files
 
 
 def run_command(cmd, files=None):
-    """Exécute une commande et affiche Passed/Failed/Skipped"""
+    # Exécute une commande sur les fichiers donnés et stoppe si erreur
     full_cmd = cmd.copy()
-
-    # On ajoute les fichiers seulement pour les outils qui l'acceptent
-    if files and cmd[0] not in ["bandit", "safety", "semgrep"]:
+    if files:
         full_cmd.extend(files)
 
-    print(f"Execution: {' '.join(full_cmd)}")
+    # print(f"Execution: {' '.join(full_cmd)}")
     try:
         result = subprocess.run(full_cmd, check=True, capture_output=True, text=True)
-
         if result.stdout.strip():
             print(result.stdout.strip())
-
-        print(f"Passed: {' '.join(full_cmd)}")
-        return True
-
+        print(f"Succes: {' '.join(full_cmd)}")
     except subprocess.CalledProcessError as e:
-        print(f"Failed: {' '.join(full_cmd)} (code {e.returncode})")
-
+        print(f"Échec: {' '.join(full_cmd)} (code {e.returncode})")
         if e.stdout.strip():
             print("\n--- Sortie standard ---")
             print(e.stdout.strip())
-
         if e.stderr.strip():
             print("\n--- Sortie erreur ---")
             print(e.stderr.strip())
-
-        sys.exit(1)  # stoppe immédiatement le commit
+        sys.exit(e.returncode)
 
 
 def main():
     changed_files = get_changed_files()
     if not changed_files:
-        print("Aucun fichier modifié détecté")
+        print("Aucun fichier modifié détecté ")
         return
 
     py_files = [f for f in changed_files if f.endswith(".py")]
@@ -72,15 +66,11 @@ def main():
     if py_files:
         for cmd in COMMANDS["python"]:
             run_command(cmd, py_files)
-    else:
-        print("Skipped: vérifications Python (aucun fichier .py modifié)")
 
     # Étape 2 : Safety (requirements.txt)
     if req_files:
         for cmd in COMMANDS["requirements"]:
-            run_command(cmd)
-    else:
-        print("Skipped: vérification des dépendances (requirements.txt non modifié)")
+            run_command(cmd, req_files)
 
     # Étape 3 : Semgrep (analyse globale)
     for cmd in COMMANDS["generic"]:
