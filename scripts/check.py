@@ -17,7 +17,7 @@ COMMANDS = {
 
 
 def get_changed_files():
-    """Récupère les fichiers modifiés dans le commit"""
+    # Récupère les fichiers modifiés dans le commit"""
     result = subprocess.run(
         ["git", "diff", "--cached", "--name-only"],
         capture_output=True,
@@ -28,7 +28,7 @@ def get_changed_files():
 
 
 def run_command(cmd, files=None):
-    """Exécute une commande et affiche Passed/Failed/Skipped"""
+    # Exécute une commande et affiche Passed/Failed/Skipped"""
     full_cmd = cmd.copy()
 
     # On ajoute les fichiers seulement pour les outils qui l'acceptent
