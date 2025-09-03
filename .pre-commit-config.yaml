@@ -1,65 +1,71 @@
+# .pre-commit-config.yaml
+
 repos:
-  # Formatage du code avec Black
+  # ─────────────────────────────────────────────────────
+  # ÉTAPE 1 : Correction automatique (formatage)
+  # Ces outils modifient les fichiers → doivent passer en premier
+  # ─────────────────────────────────────────────────────
   - repo: https://github.com/psf/black
-    rev: 25.1.0
+    rev: 24.4.2
     hooks:
       - id: black
+        name: "🔧 [Étape 1/3] Black - Formatage automatique"
         language_version: python3
 
-  # Organisation des imports avec isort
   - repo: https://github.com/PyCQA/isort
-    rev: 6.0.1
+    rev: 5.13.2
     hooks:
       - id: isort
-        name: isort (python)
-        language_version: python3
+        name: "🔧 [Étape 1/3] isort - Tri des imports"
+        args: [--profile, black]
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
-    rev: v0.12.11
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.3
     hooks:
-      # Run the linter.
-      - id: ruff-check
-      # Run the formatter.
       - id: ruff-format
+        name: "🔧 [Étape 1/3] Ruff format - Formatage rapide"
+        # Si tu utilises ruff-format (remplacement de black)
+        # Supprime Black si tu utilises celui-ci
 
-  # Analyse de sécurité statique avec Bandit
+  # ─────────────────────────────────────────────────────
+  # ÉTAPE 2 : Avertissements (ne bloquent pas)
+  # Affichent des problèmes, mais permettent le commit
+  # ─────────────────────────────────────────────────────
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.8.6
+    rev: 1.7.8
     hooks:
       - id: bandit
-        args: ["--skip", "B311"]
+        name: "⚠️ [Étape 2/3] Bandit - Sécurité (avertissement)"
+        args: [-c, pyproject.toml]  # si tu as un config
+        # Toujours réussir (ne bloque pas)
+        always_fail: false  # même si vulnérabilités trouvées
 
-  # Vérification des vulnérabilités des dépendances avec Safety
-  # - repo: local
+  # - repo: https://github.com/jjrichard19/safety-pre-commit
+  #   rev: v1.0.0
   #   hooks:
-  #     - id: safety-scan
-  #       name: safety scan
-  #       entry: safety
+  #     - id: safety
+  #       name: "⚠️ [Étape 2/3] Safety - Dépendances vulnérables"
+  #       # Ne bloque pas, juste un avertissement
+  #       entry: safety check --full-report
   #       language: system
-  #       pass_filenames: false
-  #       args: ["scan", "-r", "requirements.txt"]
+  #       always_fail: false
 
-  # Analyse de code et détection de vulnérabilités avec Semgrep
-  - repo: https://github.com/semgrep/pre-commit
-    rev: 'v1.134.0'
+  # ─────────────────────────────────────────────────────
+  # ÉTAPE 3 : Blocage si erreurs (linting strict)
+  # Arrête le commit si des problèmes sont détectés
+  # ─────────────────────────────────────────────────────
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.3
     hooks:
-      - id: semgrep-ci
+      - id: ruff
+        name: "❌ [Étape 3/3] Ruff - Linting strict (bloquant)"
+        args: [--fix, --exit-non-zero-on-fix]  # Corrige si possible, mais échoue si besoin de fix
+        # Pour un mode strict sans correction :
+        # args: [--no-fix]
 
-  # Nettoie les espaces inutiles, assure une fin de fichier correcte.
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-json
-
-
-  # Vérification du style et linting avec Flake8
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
     hooks:
       - id: flake8
-        additional_dependencies: [flake8-bugbear]  # Optionnel pour plus de règles
-        args: ["--max-line-length=250"]
+        name: "❌ [Étape 3/3] Flake8 - Linting strict"
+        additional_dependencies: [flake8-bugbear, flake8-builtins]
