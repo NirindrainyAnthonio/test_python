@@ -1,71 +1,8 @@
-# .pre-commit-config.yaml
-
 repos:
-  # ─────────────────────────────────────────────────────
-  # ÉTAPE 1 : Correction automatique (formatage)
-  # Ces outils modifient les fichiers → doivent passer en premier
-  # ─────────────────────────────────────────────────────
-  - repo: https://github.com/psf/black
-    rev: 24.4.2
+  - repo: local
     hooks:
-      - id: black
-        name: "🔧 [Étape 1/3] Black - Formatage automatique"
-        language_version: python3
-
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: "🔧 [Étape 1/3] isort - Tri des imports"
-        args: [--profile, black]
-
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.4.3
-    hooks:
-      - id: ruff-format
-        name: "🔧 [Étape 1/3] Ruff format - Formatage rapide"
-        # Si tu utilises ruff-format (remplacement de black)
-        # Supprime Black si tu utilises celui-ci
-
-  # ─────────────────────────────────────────────────────
-  # ÉTAPE 2 : Avertissements (ne bloquent pas)
-  # Affichent des problèmes, mais permettent le commit
-  # ─────────────────────────────────────────────────────
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.8
-    hooks:
-      - id: bandit
-        name: "⚠️ [Étape 2/3] Bandit - Sécurité (avertissement)"
-        args: [-c, pyproject.toml]  # si tu as un config
-        # Toujours réussir (ne bloque pas)
-        always_fail: false  # même si vulnérabilités trouvées
-
-  # - repo: https://github.com/jjrichard19/safety-pre-commit
-  #   rev: v1.0.0
-  #   hooks:
-  #     - id: safety
-  #       name: "⚠️ [Étape 2/3] Safety - Dépendances vulnérables"
-  #       # Ne bloque pas, juste un avertissement
-  #       entry: safety check --full-report
-  #       language: system
-  #       always_fail: false
-
-  # ─────────────────────────────────────────────────────
-  # ÉTAPE 3 : Blocage si erreurs (linting strict)
-  # Arrête le commit si des problèmes sont détectés
-  # ─────────────────────────────────────────────────────
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.4.3
-    hooks:
-      - id: ruff
-        name: "❌ [Étape 3/3] Ruff - Linting strict (bloquant)"
-        args: [--fix, --exit-non-zero-on-fix]  # Corrige si possible, mais échoue si besoin de fix
-        # Pour un mode strict sans correction :
-        # args: [--no-fix]
-
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        name: "❌ [Étape 3/3] Flake8 - Linting strict"
-        additional_dependencies: [flake8-bugbear, flake8-builtins]
+      - id: check-deps
+        name: Vérification des dépendances
+        entry: python scripts/check.py
+        language: system
+        pass_filenames: false
