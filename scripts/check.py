@@ -36,12 +36,12 @@ def run_command(cmd, files=None):
     if files:
         full_cmd.extend(files)
 
-    print(f"Execution: {' '.join(full_cmd)}")
+    # print(f"Execution: {' '.join(full_cmd)}")
     try:
         result = subprocess.run(full_cmd, check=True, capture_output=True, text=True)
         if result.stdout.strip():
             print(result.stdout.strip())
-        print(f"Succes: {' '.join(full_cmd)}")
+        # print(f"Succes: {' '.join(full_cmd)}")
     except subprocess.CalledProcessError as e:
         print(f"Échec: {' '.join(full_cmd)} (code {e.returncode})")
         if e.stdout.strip():
