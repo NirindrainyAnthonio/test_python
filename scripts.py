@@ -14,23 +14,14 @@ def get_staged_python_files():
     return [f.strip() for f in result.stdout.splitlines() if f.strip()]
 
 
-def run_command(command, description):
+def run_command(command, description, check_modifications=False):
     """
     Execute une commande shell.
-    Si la commande echoue, affiche l'erreur et quitte le script.
+    - Si la commande échoue => stoppe le script
+    - Si check_modifications=True et que des fichiers ont été modifiés => stoppe le script
     """
     print(f"{description}")
     print(f"   $ {' '.join(command)}")
-
-    # result = subprocess.run(
-    #     command,
-    #     capture_output=True,
-    #     text=True,
-    #     check=False,
-    # )
-
-    # print(result.returncode)
-    # sys.exit(1)
 
     try:
         result = subprocess.run(
@@ -40,15 +31,27 @@ def run_command(command, description):
             check=False,
         )
 
-        # print()
-        # sys.exit(1)
-
         if result.returncode == 0:
             if result.stdout.strip():
                 print("Succès - Sortie :")
                 print(result.stdout.strip())
             else:
                 print("Aucune erreur detectee.")
+
+            # Vérifie si la commande a modifié des fichiers
+            if check_modifications:
+                changes = subprocess.run(
+                    ["git", "diff", "--name-only"],
+                    capture_output=True,
+                    text=True,
+                )
+                if changes.stdout.strip():
+                    print(
+                        "⚠️ Des fichiers ont été modifiés automatiquement. "
+                        "Ajoute-les avec `git add` puis recommence ton commit."
+                    )
+                    sys.exit(1)
+
             return True
         else:
             print(" ECHEC :")
@@ -89,6 +92,7 @@ def run_code_quality_checks():
         run_command(
             ["black"] + staged_files,
             "Verification du formatage avec Black (verification seule)",
+            check_modifications=True,
         )
 
     # 2. Tri des imports avec isort
@@ -96,6 +100,7 @@ def run_code_quality_checks():
         run_command(
             ["isort"] + staged_files,
             "Verification des imports avec isort",
+            check_modifications=True,
         )
 
     # 3. Formatage avec ruff
@@ -103,6 +108,7 @@ def run_code_quality_checks():
         run_command(
             ["ruff", "format", "--check"] + staged_files,
             "Verification du formatage avec ruff",
+            check_modifications=True,
         )
 
     # 4. Verification de securite des dependances
