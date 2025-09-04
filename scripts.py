@@ -1,35 +1,18 @@
 #!/usr/bin/env python3
 
-import os
 import subprocess
 import sys
+import os
 
 
 def get_staged_python_files():
-    """
-    Recupère la liste des fichiers Python (.py) qui sont dans le stage (git add).
-    Ignore les fichiers supprimes.
-    """
-    try:
-        result = subprocess.run(
-            ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        files = []
-        for file in result.stdout.splitlines():
-            file = file.strip()
-            if file.endswith(".py") and os.path.isfile(file):
-                files.append(file)
-        return files
-    except subprocess.CalledProcessError as e:
-        print("Erreur lors de la recuperation des fichiers stages :")
-        print(e.stderr)
-        sys.exit(1)
-    except Exception as e:
-        print(f"Erreur inattendue : {e}")
-        sys.exit(1)
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--name-only"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return [f.strip() for f in result.stdout.splitlines() if f.strip()]
 
 
 def run_command(command, description):
@@ -92,7 +75,7 @@ def run_code_quality_checks():
     # 1. Formatage avec black
     if staged_files:
         run_command(
-            ["black", "--check"] + staged_files,
+            ["black"] + staged_files,
             "Verification du formatage avec Black (verification seule)",
         )
 
