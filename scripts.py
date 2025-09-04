@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import subprocess
 import sys
 
@@ -105,13 +106,13 @@ def run_code_quality_checks():
         )
 
     # 4. Verification de securite des dependances
-    # if os.path.isfile("requirements.txt"):
-    #     run_command(
-    #         ["safety", "scan", "-r", "requirements.txt"],
-    #         "Verification de securite avec safety (requirements.txt)",
-    #     )
-    # else:
-    #     print("Skipping safety check: requirements.txt non trouve.")
+    if os.path.isfile("requirements.txt"):
+        run_command(
+            ["safety", "check", "--file=requirements.txt", "--full-report"],
+            "Verification de securite avec safety (requirements.txt)",
+        )
+    else:
+        print("Skipping safety check: requirements.txt non trouve.")
 
     # 5. Verification de style avec flake8
     if staged_files:
