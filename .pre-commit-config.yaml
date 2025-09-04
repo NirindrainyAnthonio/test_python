@@ -3,6 +3,6 @@ repos:
     hooks:
       - id: check-deps
         name: Vérification des dépendances
-        entry: python scripts/check.py
+        entry: python scripts.py
         language: system
         pass_filenames: false
