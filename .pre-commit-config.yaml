@@ -1,8 +1,17 @@
+# repos:
+#   - repo: local
+#     hooks:
+#       - id: check-deps
+#         name: Vérification des dépendances
+#         entry: python scripts.py
+#         language: system
+#         pass_filenames: false
+
+
 repos:
   - repo: local
     hooks:
-      - id: check-deps
-        name: Vérification des dépendances
-        entry: python scripts.py
+      - id: custom-steps
+        name: "Pipeline en 3 etapes"
+        entry: bash scripts.sh
         language: system
-        pass_filenames: false
