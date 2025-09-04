@@ -23,37 +23,50 @@ def run_command(command, description):
     print(f"{description}")
     print(f"   $ {' '.join(command)}")
 
-    try:
-        result = subprocess.run(
+    result = subprocess.run(
             command,
             capture_output=True,
             text=True,
             check=False,
         )
 
-        if result.returncode == 0:
-            if result.stdout.strip():
-                print("Succès - Sortie :")
-                print(result.stdout.strip())
-            else:
-                print("Aucune erreur detectee.")
-            return True
-        else:
-            print(" ECHEC :")
-            if result.stderr.strip():
-                print(result.stderr.strip())
-            elif result.stdout.strip():
-                print(result.stdout.strip())
-            print(f"Commande echouee : {' '.join(command)} (code: {result.returncode})")
-            sys.exit(1)
+    print(result)
+    sys.exit(1)
 
-    except FileNotFoundError:
-        print(f"Erreur : la commande '{command[0]}' est introuvable.")
-        print(f"   Installez-la avec : pip install {command[0]}")
-        sys.exit(1)
-    except Exception as e:
-        print(f"Erreur inattendue : {e}")
-        sys.exit(1)
+    # try:
+    #     result = subprocess.run(
+    #         command,
+    #         capture_output=True,
+    #         text=True,
+    #         check=False,
+    #     )
+
+    #     print()
+    #     sys.exit(1)
+
+    #     if result.returncode == 0:
+    #         if result.stdout.strip():
+    #             print("Succès - Sortie :")
+    #             print(result.stdout.strip())
+    #         else:
+    #             print("Aucune erreur detectee.")
+    #         return True
+    #     else:
+    #         print(" ECHEC :")
+    #         if result.stderr.strip():
+    #             print(result.stderr.strip())
+    #         elif result.stdout.strip():
+    #             print(result.stdout.strip())
+    #         print(f"Commande echouee : {' '.join(command)} (code: {result.returncode})")
+    #         sys.exit(1)
+
+    # except FileNotFoundError:
+    #     print(f"Erreur : la commande '{command[0]}' est introuvable.")
+    #     print(f"   Installez-la avec : pip install {command[0]}")
+    #     sys.exit(1)
+    # except Exception as e:
+    #     print(f"Erreur inattendue : {e}")
+    #     sys.exit(1)
 
 
 def run_code_quality_checks():
@@ -110,7 +123,7 @@ def run_code_quality_checks():
     if staged_files:
         run_command(["ruff", "check"] + staged_files, "Analyse du code avec ruff")
 
-    print("Toutes les verifications ont reussi ! ✅")
+    print("Toutes les verifications ont reussi !")
     print("Tu peux maintenant valider ton commit.")
 
 
