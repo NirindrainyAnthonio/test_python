@@ -18,7 +18,7 @@ def run_command(command, description, check_modifications=False):
     """
     Execute une commande shell.
     - Si la commande échoue => stoppe le script
-    - Si check_modifications=True et que des fichiers ont été modifiés => stoppe le script
+    - Si check_modifications=True et que des fichiers ont ete modifies => stoppe le script
     """
     print(f"{description}")
     print(f"   $ {' '.join(command)}")
@@ -47,7 +47,7 @@ def run_command(command, description, check_modifications=False):
                 )
                 if changes.stdout.strip():
                     print(
-                        "⚠️ Des fichiers ont été modifiés automatiquement. "
+                        "Des fichiers ont ete modifies automatiquement. "
                         "Ajoute-les avec `git add` puis recommence ton commit."
                     )
                     sys.exit(1)
@@ -85,7 +85,7 @@ def run_code_quality_checks():
         print("Aucun fichier Python modifie trouve. (rien à verifier)")
         return
 
-    print(f"Fichiers à verifier : {', '.join(staged_files)}\n")
+    print(f"Fichiers a verifier : {', '.join(staged_files)}\n")
 
     # 1. Formatage avec black
     if staged_files:
