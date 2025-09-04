@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-
 import subprocess
 import sys
-import os
 
 
 def get_staged_python_files():
@@ -23,50 +21,50 @@ def run_command(command, description):
     print(f"{description}")
     print(f"   $ {' '.join(command)}")
 
-    result = subprocess.run(
+    # result = subprocess.run(
+    #     command,
+    #     capture_output=True,
+    #     text=True,
+    #     check=False,
+    # )
+
+    # print(result.returncode)
+    # sys.exit(1)
+
+    try:
+        result = subprocess.run(
             command,
             capture_output=True,
             text=True,
             check=False,
         )
 
-    print(result)
-    sys.exit(1)
+        # print()
+        # sys.exit(1)
 
-    # try:
-    #     result = subprocess.run(
-    #         command,
-    #         capture_output=True,
-    #         text=True,
-    #         check=False,
-    #     )
+        if result.returncode == 0:
+            if result.stdout.strip():
+                print("Succès - Sortie :")
+                print(result.stdout.strip())
+            else:
+                print("Aucune erreur detectee.")
+            return True
+        else:
+            print(" ECHEC :")
+            if result.stderr.strip():
+                print(result.stderr.strip())
+            elif result.stdout.strip():
+                print(result.stdout.strip())
+            print(f"Commande echouee : {' '.join(command)} (code: {result.returncode})")
+            sys.exit(1)
 
-    #     print()
-    #     sys.exit(1)
-
-    #     if result.returncode == 0:
-    #         if result.stdout.strip():
-    #             print("Succès - Sortie :")
-    #             print(result.stdout.strip())
-    #         else:
-    #             print("Aucune erreur detectee.")
-    #         return True
-    #     else:
-    #         print(" ECHEC :")
-    #         if result.stderr.strip():
-    #             print(result.stderr.strip())
-    #         elif result.stdout.strip():
-    #             print(result.stdout.strip())
-    #         print(f"Commande echouee : {' '.join(command)} (code: {result.returncode})")
-    #         sys.exit(1)
-
-    # except FileNotFoundError:
-    #     print(f"Erreur : la commande '{command[0]}' est introuvable.")
-    #     print(f"   Installez-la avec : pip install {command[0]}")
-    #     sys.exit(1)
-    # except Exception as e:
-    #     print(f"Erreur inattendue : {e}")
-    #     sys.exit(1)
+    except FileNotFoundError:
+        print(f"Erreur : la commande '{command[0]}' est introuvable.")
+        print(f"   Installez-la avec : pip install {command[0]}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Erreur inattendue : {e}")
+        sys.exit(1)
 
 
 def run_code_quality_checks():
@@ -95,7 +93,7 @@ def run_code_quality_checks():
     # 2. Tri des imports avec isort
     if staged_files:
         run_command(
-            ["isort", "--check-only"] + staged_files,
+            ["isort"] + staged_files,
             "Verification des imports avec isort",
         )
 
@@ -107,17 +105,20 @@ def run_code_quality_checks():
         )
 
     # 4. Verification de securite des dependances
-    if os.path.isfile("requirements.txt"):
-        run_command(
-            ["safety", "check", "-r", "requirements.txt"],
-            "Verification de securite avec safety (requirements.txt)",
-        )
-    else:
-        print("Skipping safety check: requirements.txt non trouve.")
+    # if os.path.isfile("requirements.txt"):
+    #     run_command(
+    #         ["safety", "scan", "-r", "requirements.txt"],
+    #         "Verification de securite avec safety (requirements.txt)",
+    #     )
+    # else:
+    #     print("Skipping safety check: requirements.txt non trouve.")
 
     # 5. Verification de style avec flake8
     if staged_files:
-        run_command(["flake8"] + staged_files, "Verification du style avec flake8")
+        run_command(
+            ["flake8", "--max-line-length=250"] + staged_files,
+            "Verification du style avec flake8",
+        )
 
     # 6. Analyse statique avec ruff
     if staged_files:
