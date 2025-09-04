@@ -1,17 +1,48 @@
-# repos:
-#   - repo: local
-#     hooks:
-#       - id: check-deps
-#         name: Vérification des dépendances
-#         entry: python scripts.py
-#         language: system
-#         pass_filenames: false
-
-
 repos:
-  - repo: local
+  # === Étape 1 : auto-fix ===
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
     hooks:
-      - id: custom-steps
-        name: "Pipeline en 3 etapes"
-        entry: bash scripts.sh
-        language: system
+      - id: black
+        name: "Black (formatage auto)"
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: "Isort (organisation imports auto)"
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff-format
+        name: "Ruff (auto-format)"
+
+  # === Étape 2 : avertissements (ne bloquent pas) ===
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.9
+    hooks:
+      - id: bandit
+        name: "Bandit (sécurité - avertissement)"
+        args: [--exit-zero]   # => tsy manakana commit
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.4.2
+    hooks:
+      - id: python-safety-dependencies-check
+        name: "Safety (dépendances vulnérables - avertissement)"
+        args: [--exit-zero]   # => tsy manakana commit
+
+  # === Étape 3 : bloquants ===
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        additional_dependencies: [flake8-bugbear]  # Optionnel pour plus de règles
+        args: ["--max-line-length=250"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        name: "Ruff (strict - bloquant)"
