@@ -36,3 +36,15 @@ def minus9(a, b):
 
 def add10(a, b):
     return a + b
+
+
+def add11(a, b):
+    return a + b
+
+
+def minus12(a, b):
+    return a - b
+
+
+def add13(a, b):
+    return a + b
