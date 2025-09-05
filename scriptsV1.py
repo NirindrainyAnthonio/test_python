@@ -14,11 +14,11 @@ def get_staged_python_files():
     return [f.strip() for f in result.stdout.splitlines() if f.strip()]
 
 
-def run_command(command, description, stop_if_modified=False):
+def run_command(command, description, check_modifications=False):
     """
     Execute une commande shell.
     - Si la commande échoue => stoppe le script
-    - Si stop_if_modified=True et que des fichiers ont été modifiés sur disque => stoppe le script
+    - Si check_modifications=True et que des fichiers ont ete modifies => stoppe le script
     """
     print(f"{description}")
     print(f"   $ {' '.join(command)}")
@@ -38,25 +38,23 @@ def run_command(command, description, stop_if_modified=False):
             else:
                 print("Aucune erreur detectee.")
 
-            if stop_if_modified:
+            # Vérifie si la commande a modifié des fichiers
+            if check_modifications:
                 changes = subprocess.run(
-                    ["git", "ls-files", "--modified"],
+                    ["git", "diff", "--name-only"],
                     capture_output=True,
                     text=True,
                 )
-                modified_files = [
-                    f.strip() for f in changes.stdout.splitlines() if f.strip()
-                ]
-                if modified_files:
+                if changes.stdout.strip():
                     print(
-                        f"Des fichiers ont été modifiés automatiquement : {', '.join(modified_files)}"
+                        "Des fichiers ont ete modifies automatiquement. "
+                        "Ajoute-les avec `git add` puis recommence ton commit."
                     )
-                    print("Fais `git add` puis relance ton commit.")
                     sys.exit(1)
 
             return True
         else:
-            print("ECHEC :")
+            print(" ECHEC :")
             if result.stderr.strip():
                 print(result.stderr.strip())
             elif result.stdout.strip():
@@ -66,7 +64,7 @@ def run_command(command, description, stop_if_modified=False):
 
     except FileNotFoundError:
         print(f"Erreur : la commande '{command[0]}' est introuvable.")
-        print(f"Installez-la avec : pip install {command[0]}")
+        print(f"   Installez-la avec : pip install {command[0]}")
         sys.exit(1)
     except Exception as e:
         print(f"Erreur inattendue : {e}")
@@ -76,7 +74,7 @@ def run_command(command, description, stop_if_modified=False):
 def run_code_quality_checks():
     """
     Execute les verifications de qualite uniquement sur les fichiers Python stages.
-    S'arrête dès qu'une commande echoue ou modifie un fichier.
+    S'arrête dès qu'une commande echoue.
     """
     print("Demarrage des verifications sur les fichiers modifies...")
 
@@ -90,25 +88,28 @@ def run_code_quality_checks():
     print(f"Fichiers a verifier : {', '.join(staged_files)}\n")
 
     # 1. Formatage avec black
-    run_command(
-        ["black"] + staged_files,
-        "Verification du formatage avec Black",
-        stop_if_modified=True,
-    )
+    if staged_files:
+        run_command(
+            ["black"] + staged_files,
+            "Verification du formatage avec Black (verification seule)",
+            check_modifications=True,
+        )
 
     # 2. Tri des imports avec isort
-    run_command(
-        ["isort"] + staged_files,
-        "Verification des imports avec isort",
-        stop_if_modified=True,
-    )
+    if staged_files:
+        run_command(
+            ["isort"] + staged_files,
+            "Verification des imports avec isort",
+            check_modifications=True,
+        )
 
     # 3. Formatage avec ruff
-    run_command(
-        ["ruff", "format"] + staged_files,
-        "Verification du formatage avec ruff",
-        stop_if_modified=True,
-    )
+    if staged_files:
+        run_command(
+            ["ruff", "format", "--check"] + staged_files,
+            "Verification du formatage avec ruff",
+            check_modifications=True,
+        )
 
     # 4. Verification de securite des dependances
     if os.path.isfile("requirements.txt"):
@@ -120,13 +121,15 @@ def run_code_quality_checks():
         print("Skipping safety check: requirements.txt non trouve.")
 
     # 5. Verification de style avec flake8
-    run_command(
-        ["flake8", "--max-line-length=250"] + staged_files,
-        "Verification du style avec flake8",
-    )
+    if staged_files:
+        run_command(
+            ["flake8", "--max-line-length=250"] + staged_files,
+            "Verification du style avec flake8",
+        )
 
     # 6. Analyse statique avec ruff
-    run_command(["ruff", "check"] + staged_files, "Analyse du code avec ruff")
+    if staged_files:
+        run_command(["ruff", "check"] + staged_files, "Analyse du code avec ruff")
 
     print("Toutes les verifications ont reussi !")
     print("Tu peux maintenant valider ton commit.")
